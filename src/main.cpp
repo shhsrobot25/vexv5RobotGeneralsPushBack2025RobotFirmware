@@ -1,14 +1,13 @@
 #include "main.h"
 
-#define LEFT_WHEELS_PORT 15
-#define RIGHT_WHEELS_PORT -13
-#define FEEDER_PORT 1
-#define EXTRUDER_LIFT_A_PORT 2
-#define EXTRUDER_LIFT_B_PORT 7
-#define EXTRUDER_LOWER_PORT 4
-#define EXTRUDER_MIDDLE_PORT 5
-#define EXTRUDER_UPPER_PORT 3
-#define EXTRUDER_TOP_PORT 6
+#define LEFT_WHEELS_PORT 1
+#define RIGHT_WHEELS_PORT -2
+#define FEEDER_PORT -3
+#define EXTRUDER_LIFT_PORT 18
+#define EXTRUDER_LOWER_PORT -15
+#define EXTRUDER_MIDDLE_PORT -16
+#define EXTRUDER_UPPER_PORT -19
+#define EXTRUDER_TOP_PORT -20
 
 void opcontrol() {
     pros::Controller master(CONTROLLER_MASTER);
@@ -17,7 +16,7 @@ void opcontrol() {
     pros::Motor left_wheels(LEFT_WHEELS_PORT, pros::v5::MotorGears::green);
     pros::Motor right_wheels(RIGHT_WHEELS_PORT, pros::v5::MotorGears::green);
     pros::Motor feeder(FEEDER_PORT, pros::v5::MotorGears::green);
-    pros::MotorGroup extruder_lift({EXTRUDER_LIFT_A_PORT, EXTRUDER_LIFT_B_PORT}, pros::v5::MotorGears::green);
+    pros::Motor extruder_lift(EXTRUDER_LIFT_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_lower(EXTRUDER_LOWER_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_middle(EXTRUDER_MIDDLE_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_upper(EXTRUDER_UPPER_PORT, pros::v5::MotorGears::green);
@@ -26,7 +25,6 @@ void opcontrol() {
     bool driverReverse = false;
 
     while (true) {
-        // master controls
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2) && !driverReverse) {
             driverReverse = true;
         } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2) && driverReverse) {
@@ -40,7 +38,6 @@ void opcontrol() {
             right_wheels.move(master.get_analog(ANALOG_RIGHT_Y));
         }
 
-        // reversable partner controls
         if (!partner.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
                 feeder.move(127);
@@ -122,12 +119,17 @@ void opcontrol() {
 }
 
 void autonomous() {
-    pros::Motor left_wheels(LEFT_WHEELS_PORT, pros::v5::MotorGears::green);
-    pros::Motor right_wheels(RIGHT_WHEELS_PORT, pros::v5::MotorGears::green);
+    pros::Motor left_wheels(LEFT_WHEELS_PORT, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
+    pros::Motor right_wheels(RIGHT_WHEELS_PORT, pros::v5::MotorGears::green, pros::v5::MotorUnits::rotations);
     pros::Motor feeder(FEEDER_PORT, pros::v5::MotorGears::green);
-    pros::MotorGroup extruder_lift({EXTRUDER_LIFT_A_PORT, EXTRUDER_LIFT_B_PORT}, pros::v5::MotorGears::green);
+    pros::Motor extruder_lift(EXTRUDER_LIFT_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_lower(EXTRUDER_LOWER_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_middle(EXTRUDER_MIDDLE_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_upper(EXTRUDER_UPPER_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_top(EXTRUDER_TOP_PORT, pros::v5::MotorGears::green);
+}
+
+float distToRevos(float dist) {
+    float circ = 13.15541923690726;
+    return dist/circ;
 }

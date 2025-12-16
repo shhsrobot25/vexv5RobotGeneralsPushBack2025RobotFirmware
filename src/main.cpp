@@ -1,13 +1,13 @@
 #include "main.h"
 
-#define LEFT_WHEELS_PORT 1
-#define RIGHT_WHEELS_PORT -2
+#define LEFT_WHEELS_PORT 2
+#define RIGHT_WHEELS_PORT -1
 #define FEEDER_PORT -3
-#define EXTRUDER_LIFT_PORT 18
-#define EXTRUDER_LOWER_PORT -15
-#define EXTRUDER_MIDDLE_PORT -16
-#define EXTRUDER_UPPER_PORT -19
-#define EXTRUDER_TOP_PORT -20
+#define EXTRUDER_LIFT_PORT 17
+#define EXTRUDER_LOWER_PORT -16
+#define EXTRUDER_MIDDLE_PORT -19
+#define EXTRUDER_UPPER_PORT -20
+#define PI 3.14159265359
 
 void opcontrol() {
     pros::Controller master(CONTROLLER_MASTER);
@@ -20,7 +20,6 @@ void opcontrol() {
     pros::Motor extruder_lower(EXTRUDER_LOWER_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_middle(EXTRUDER_MIDDLE_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_upper(EXTRUDER_UPPER_PORT, pros::v5::MotorGears::green);
-    pros::Motor extruder_top(EXTRUDER_TOP_PORT, pros::v5::MotorGears::green);
 
     bool driverReverse = false;
 
@@ -49,31 +48,26 @@ void opcontrol() {
                 extruder_lower.move(-127);
                 extruder_middle.move(0);
                 extruder_upper.move(0);
-                extruder_top.move(0);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
                 extruder_lift.move(127);
                 extruder_lower.move(127);
-                extruder_middle.move(127);
-                extruder_upper.move(-127);
-                extruder_top.move(0);
+                extruder_middle.move(-127);
+                extruder_upper.move(0);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
                 extruder_lift.move(127);
                 extruder_lower.move(127);
                 extruder_middle.move(127);
-                extruder_upper.move(127);
-                extruder_top.move(-127);
+                extruder_upper.move(-127);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
                 extruder_lift.move(127);
                 extruder_lower.move(127);
                 extruder_middle.move(127);
                 extruder_upper.move(127);
-                extruder_top.move(127);
             } else {
                 extruder_lift.move(0);
                 extruder_lower.move(0);
                 extruder_middle.move(0);
                 extruder_upper.move(0);
-                extruder_top.move(0);
             }
         } else {
             if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
@@ -86,36 +80,46 @@ void opcontrol() {
                 extruder_lower.move(127);
                 extruder_middle.move(0);
                 extruder_upper.move(0);
-                extruder_top.move(0);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) {
                 extruder_lift.move(-127);
                 extruder_lower.move(-127);
-                extruder_middle.move(-127);
-                extruder_upper.move(127);
-                extruder_top.move(0);
+                extruder_middle.move(127);
+                extruder_upper.move(0);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_UP)) {
                 extruder_lift.move(-127);
                 extruder_lower.move(-127);
                 extruder_middle.move(-127);
-                extruder_upper.move(-127);
-                extruder_top.move(127);
+                extruder_upper.move(127);
             } else if (partner.get_digital(pros::E_CONTROLLER_DIGITAL_LEFT)) {
                 extruder_lift.move(-127);
                 extruder_lower.move(-127);
                 extruder_middle.move(-127);
                 extruder_upper.move(-127);
-                extruder_top.move(-127);
             } else {
                 extruder_lift.move(0);
                 extruder_lower.move(0);
                 extruder_middle.move(0);
                 extruder_upper.move(0);
-                extruder_top.move(0);
             }
         }
 
         pros::delay(2);
     }
+}
+
+float distToRevos(float dist) {
+    float wheelRadius = 2.0625;
+    float slipCorrection = 1.075;
+    return (dist/(2*PI*wheelRadius))*slipCorrection;
+}
+
+float angleToRevos(float angleDeg) {
+    float wheelbase = 9.0;
+    float wheelRadius = 2.0625;
+    float theta = angleDeg*PI/180;
+    float slipCorrection = 1.075;
+    float revos = (theta*wheelbase)/(4*PI*wheelRadius);
+    return revos*slipCorrection;
 }
 
 void autonomous() {
@@ -126,10 +130,18 @@ void autonomous() {
     pros::Motor extruder_lower(EXTRUDER_LOWER_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_middle(EXTRUDER_MIDDLE_PORT, pros::v5::MotorGears::green);
     pros::Motor extruder_upper(EXTRUDER_UPPER_PORT, pros::v5::MotorGears::green);
-    pros::Motor extruder_top(EXTRUDER_TOP_PORT, pros::v5::MotorGears::green);
-}
+/*
+    left_wheels.move_relative(distToRevos(8), 127);
+    right_wheels.move_relative(distToRevos(8), 127);
 
-float distToRevos(float dist) {
-    float circ = 13.15541923690726;
-    return dist/circ;
+    pros::delay(2000);
+
+    left_wheels.move_relative(angleToRevos(360), 127);
+    right_wheels.move_relative(angleToRevos(360)*-1, 127);
+
+    pros::delay(3000);
+
+    left_wheels.move_relative(distToRevos(6), 127);
+    right_wheels.move_relative(distToRevos(6), 127);
+*/
 }
